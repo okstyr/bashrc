@@ -18,9 +18,13 @@ alias list='classToFileOrDir dir'
 alias subs='classToFileOrDir subs'
 alias meths='classToFileOrDir methods'
 alias methods='classToFileOrDir methods'
+alias bh='cd ~/branches/HEAD'
+
 # vim should always open multiple files easily
 #alias vim='vim -p'
 # the way grep should always work
+# TODO: work out why since i migrated to linux mint 15 a pipe to grep now acts like
+#       egrep -ir --color *  ie it ignores the piped data
 alias grep='egrep -ir --color'
 
 # quickly create executable file
@@ -28,7 +32,6 @@ vimx()
 {
     vim $1; chmod +x $1
 }
-
 #cat ~/toolbox/mysql/aliases/csh | sed 's/^alias \(.*\) \(mysql .*\)$/alias \1="\2"/' > $HOME/myalias
 cat ~/toolbox/mysql/aliases/csh | tr -s ' ' |sed 's/^alias \(.*\) \(mysql .*\)$/alias \1="\2"/' > $HOME/myalias
 source myalias
@@ -70,15 +73,17 @@ PROMPT_COMMAND="smiley; branch; history -a"
 # don't overwrite history - just append
 shopt -s histappend
 
-# rvm stuff
-if [[ -s "$HOME/.rvm/scripts/rvm" ]]
-then 
-    source "$HOME/.rvm/scripts/rvm"
-  #  rvm use ruby-1.8.7-p358
+# not if i have just done 'sudo bash' (not that i EVER would)
+if [[ `whoami` != root ]]; then
+    if [[ -s "$HOME/.rvm/scripts/rvm" ]]
+    then 
+        source "$HOME/.rvm/scripts/rvm"
+        rvm use ruby-1.8.7
+    fi
 fi
 
 # rea-ec2 stuff
-if [[ `gem list |grep rea-ec2` ]]; then
+if [[ `gem list |egrep rea-ec2` ]]; then
     # noisy fucking slow tool
     eval `rea-ec2-aws-tools-env 2>/dev/null` &
 fi
@@ -97,7 +102,9 @@ fi
 
 ##-----------------------------------------------------------------
 ## command line utility aliases
-alias ack='ack --group --color'
+#alias ack='ack --group --color'
+# on ubuntu....
+alias ack='ack-grep --group --color'
 
 ##-----------------------------------------------------------------
 ## here begins a whole bunch of prompt stuff
@@ -154,7 +161,13 @@ function makeps1 {
         local newPWD=${thispwd}
     fi
 
-    PS1="${TITLEBAR}${BLUE}\h:${GREEN}${newPWD}${BLUE} \t ${PURPLE}${branch} $smiley ${NORMAL}> "
+    if [[ `whoami` == root ]]; then
+        export HOSTCOLOR=$RED
+    else
+        export HOSTCOLOR=$BLUE
+    fi
+
+    PS1="${TITLEBAR}${HOSTCOLOR}\h:${GREEN}${newPWD}${BLUE} \t ${PURPLE}${branch} $smiley ${NORMAL}> "
 }
 
 
