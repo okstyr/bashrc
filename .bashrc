@@ -22,10 +22,18 @@ alias bh='cd ~/branches/HEAD'
 
 # vim should always open multiple files easily
 #alias vim='vim -p'
+
 # the way grep should always work
-# TODO: work out why since i migrated to linux mint 15 a pipe to grep now acts like
-#       egrep -ir --color *  ie it ignores the piped data
-alias grep='egrep -ir --color'
+# yeah right since jan 2013 (maybe - commit id d1d7245219bc56e6a4f25c18d6f8f4b4b9bb42d6 i think)
+# this behaviour has been broken (deliberately) in gnu grep. -r with no args will scan $PWD
+# even if grep is on the receiving end of a pipe
+#alias grep='egrep -ir --color'
+# and GREP_OPTIONS would be great if you could occasionally turn it off easily
+#export GREP_OPTIONS='-ir --color'
+# so....
+alias rgrep='egrep -ir --color'
+alias grep='egrep -i --color'
+# sheesh!
 
 # quickly create executable file
 vimx()
@@ -67,7 +75,7 @@ export MYSQL_PS1="\u@\h \d> "
 # unlimited histfile
 unset HISTFILESIZE
 #lotsa lines in memory
-HISTSIZE=100000
+HISTSIZE=1000000
 # write to history file every time we write a prompt
 PROMPT_COMMAND="smiley; branch; history -a"
 # don't overwrite history - just append
@@ -153,6 +161,8 @@ function makeps1 {
     ##   Indicator that there has been directory truncation:
     local trunc_symbol="..."
     export thispwd=`echo $PWD|sed -e $sedHOME`
+    #TODO: instead of $pwdmaxlen - should be something like half of `tput cols` less
+    # length of rest of prompt
     if [ ${#thispwd} -gt $pwdmaxlen ]
     then
         local pwdoffset=$(( ${#thispwd} - $pwdmaxlen ))
@@ -166,8 +176,9 @@ function makeps1 {
     else
         export HOSTCOLOR=$BLUE
     fi
-
-    PS1="${TITLEBAR}${HOSTCOLOR}\h:${GREEN}${newPWD}${BLUE} \t ${PURPLE}${branch} $smiley ${NORMAL}> "
+    # adding $HISTSIZE temporarily since something is truncating my .bash_history to 500 - quelle horreur
+    # and i want to see when it changes
+    PS1="${TITLEBAR}${HOSTCOLOR}\h:${GREEN}${newPWD} ${PURPLE}${HISTSIZE}${BLUE} \t ${PURPLE}${branch} $smiley ${NORMAL}> "
 }
 
 
